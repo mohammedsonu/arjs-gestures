@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Gesture Interactions - A-Frame & AR.js</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/3.3.3/aframe/build/aframe-ar.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Food Viewer</title>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
       body {
@@ -28,7 +27,6 @@
         width: 80%;
         max-width: 400px;
         z-index: 1000;
-        pointer-events: none;
       }
       
       .close-button {
@@ -47,7 +45,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        pointer-events: auto;
       }
       
       .food-title {
@@ -88,7 +85,6 @@
         align-items: center;
         justify-content: center;
         z-index: 1000;
-        pointer-events: auto;
       }
       
       .info-button {
@@ -107,7 +103,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        pointer-events: auto;
       }
       
       .calorie-info {
@@ -145,7 +140,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        pointer-events: auto;
       }
       
       .history-info {
@@ -166,81 +160,37 @@
       .history-info.show {
         display: block;
       }
-
-      .loading-message {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        z-index: 999;
-        font-size: 18px;
-      }
-
-      .debug-info {
-        position: fixed;
-        top: 80px;
-        left: 20px;
-        background-color: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        font-family: monospace;
-        font-size: 12px;
-        z-index: 1000;
-        max-width: 300px;
-      }
     </style>
   </head>
   <body>
-    <div class="loading-message" id="loadingMsg">Initializing Camera...</div>
-    <div class="debug-info" id="debugInfo">Status: Loading...</div>
-    
     <a-scene
-      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best;"
       embedded
-      renderer="logarithmicDepthBuffer: true;"
+      arjs="sourceType: webcam; debugUIEnabled: false;"
       vr-mode-ui="enabled: false"
-      gesture-detector
-      id="scene"
     >
       <a-assets>
         <a-asset-item
-          id="bowser"
-          src="https://cdn.glitch.com/324ca137-4301-4bef-8c48-5239a7c6f4f4/burger.glb?v=1603336805099"
-        >
-        </a-asset-item>
+          id="food"
+          src="https://cdn.glitch.com/324ca137-4301-4bef-8c48-5239a7c6f4f4/burger.glb"
+        ></a-asset-item>
       </a-assets>
-      
-      <a-marker
-        preset="hiro"
-        id="markerA"
-      >
+
+      <a-marker preset="hiro">
         <a-entity
-          id="bowser-model"
-          gltf-model="#bowser"
+          gltf-model="#food"
+          scale="2 2 2"
           position="0 0.5 0"
-          scale="3 3 3"
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"
-        >
-        </a-entity>
+        ></a-entity>
       </a-marker>
-      
+
       <a-entity camera></a-entity>
     </a-scene>
     
-    <!-- UI Elements -->
     <div class="food-info">
       <div class="food-title">Crispy Royale Platter</div>
       <div class="food-description">A mouthwatering feast of golden, crispy fried chicken paired with perfectly seasoned fries, served with a rich, flavorful sauce of your choice. Crafted to perfection for a satisfying crunch in every bite!</div>
     </div>
     
-    <!-- Navigation Buttons -->
     <button class="nav-button prev-button" onclick="navigateToPage('https://raw.githack.com/PreethamReddy333/arjs-gestures/master/Grand%20Royale%20Burger.html')">
       <i class="fas fa-arrow-left"></i>
     </button>
@@ -254,12 +204,10 @@
       <i class="fas fa-info"></i>
     </button>
     
-    <!-- Food History Icon Button -->
     <button class="history-button" onclick="toggleHistory()">
       <i class="fas fa-utensils"></i>
     </button>
     
-    <!-- Calorie Info Box -->
     <div class="calorie-info" id="calorieInfo">
       <h3>Nutritional Info</h3>
       <p>Calories: 280 kcal</p>
@@ -271,97 +219,21 @@
       <p>Breathing Allergies (Anaphylaxis)</p>
     </div>
     
-    <!-- Food History Information Box -->
     <div class="history-info" id="historyInfo">
       <p>The Crispy Royale Platter has a rich history dating back to a small-town recipe passed down through generations. Initially cooked using a secret blend of herbs and spices, it evolved into the signature dish known for its irresistible crunch and flavor.</p>
     </div>
     
     <script>
-      AFRAME.registerComponent('gesture-detector', {
-        schema: {
-          element: { default: '' }
-        },
-        init: function() {
-          this.handleRotation = this.handleRotation.bind(this);
-          this.handleScale = this.handleScale.bind(this);
-        },
-        play: function() {
-          window.addEventListener('touchstart', this.handleRotation);
-          window.addEventListener('touchmove', this.handleRotation);
-          window.addEventListener('touchstart', this.handleScale);
-          window.addEventListener('touchmove', this.handleScale);
-        },
-        pause: function() {
-          window.removeEventListener('touchstart', this.handleRotation);
-          window.removeEventListener('touchmove', this.handleRotation);
-          window.removeEventListener('touchstart', this.handleScale);
-          window.removeEventListener('touchmove', this.handleScale);
-        },
-        handleRotation: function(event) {
-          if (event.touches.length === 1) {
-            this.el.emit('rotatestart', { touches: event.touches });
-          }
-        },
-        handleScale: function(event) {
-          if (event.touches.length === 2) {
-            this.el.emit('scalestart', { touches: event.touches });
-          }
-        }
-      });
-
-      // Debug and camera initialization
-      let debugEl = document.getElementById('debugInfo');
-      let loadingEl = document.getElementById('loadingMsg');
-      
-      window.addEventListener('load', function() {
-        debugEl.innerHTML = 'Status: Page Loaded<br>Camera: Starting...';
-        
-        const scene = document.querySelector('a-scene');
-        const marker = document.querySelector('#markerA');
-        
-        if (scene) {
-          scene.addEventListener('loaded', function() {
-            debugEl.innerHTML += '<br>Scene: Loaded';
-          });
-          
-          scene.addEventListener('arjs-video-loaded', function() {
-            loadingEl.style.display = 'none';
-            debugEl.innerHTML = 'Status: Camera Active<br>Point at Hiro marker';
-          });
-        }
-        
-        if (marker) {
-          marker.addEventListener('markerFound', function() {
-            debugEl.innerHTML = 'Status: Marker Found!<br>Model should be visible';
-            console.log('Marker found!');
-          });
-          
-          marker.addEventListener('markerLost', function() {
-            debugEl.innerHTML = 'Status: Marker Lost<br>Point at Hiro marker';
-            console.log('Marker lost!');
-          });
-        }
-        
-        // Hide debug info after 10 seconds if camera is active
-        setTimeout(function() {
-          if (loadingEl.style.display === 'none') {
-            debugEl.style.display = 'none';
-          }
-        }, 10000);
-      });
-
       function navigateToPage(url) {
         window.location.href = url;
       }
       
       function toggleCalorieInfo() {
-        const calorieInfo = document.getElementById('calorieInfo');
-        calorieInfo.classList.toggle('show');
+        document.getElementById('calorieInfo').classList.toggle('show');
       }
       
       function toggleHistory() {
-        const historyInfo = document.getElementById('historyInfo');
-        historyInfo.classList.toggle('show');
+        document.getElementById('historyInfo').classList.toggle('show');
       }
       
       function closeAR() {
