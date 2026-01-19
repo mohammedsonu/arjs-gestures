@@ -3,15 +3,17 @@
   <head>
     <title>Gesture Interactions - A-Frame & AR.js</title>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="gesture-detector.js"></script>
-    <script src="gesture-handler-2.js"></script>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-      /* Existing styles ... */
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      
       .food-info {
         position: fixed;
         bottom: 20px;
@@ -24,9 +26,11 @@
         font-family: Arial, sans-serif;
         text-align: center;
         width: 80%;
+        max-width: 400px;
         z-index: 1000;
         pointer-events: none;
       }
+      
       .close-button {
         position: fixed;
         top: 20px;
@@ -45,6 +49,7 @@
         justify-content: center;
         pointer-events: auto;
       }
+      
       .food-title {
         font-size: 24px;
         font-weight: bold;
@@ -54,18 +59,6 @@
       .food-description {
         font-size: 16px;
         margin-bottom: 10px;
-      }
-      
-      .nav-buttons {
-        position: fixed;
-        top: 50%;
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        padding: 0 20px;
-        z-index: 1000;
-        pointer-events: auto;
-        transform: translateY(-50%);
       }
       
       .prev-button {
@@ -94,6 +87,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        z-index: 1000;
+        pointer-events: auto;
       }
       
       .info-button {
@@ -134,7 +129,6 @@
         display: block;
       }
       
-      /* New styles for Food History Icon and Text */
       .history-button {
         position: fixed;
         bottom: 20px;
@@ -151,6 +145,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        pointer-events: auto;
       }
       
       .history-info {
@@ -171,15 +166,30 @@
       .history-info.show {
         display: block;
       }
+
+      .loading-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        z-index: 999;
+      }
     </style>
   </head>
   <body>
+    <div class="loading-message" id="loadingMsg">Initializing AR Camera...</div>
+    
     <a-scene
-      arjs
+      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
       embedded
-      renderer="logarithmicDepthBuffer: true;"
+      renderer="logarithmicDepthBuffer: true; precision: medium;"
       vr-mode-ui="enabled: false"
-      gesture-detector
       id="scene"
     >
       <a-assets>
@@ -189,6 +199,7 @@
         >
         </a-asset-item>
       </a-assets>
+      
       <a-marker
         preset="hiro"
         raycaster="objects: .clickable"
@@ -202,14 +213,14 @@
           position="0 0 0"
           scale="5 5 5"
           class="clickable"
-          gesture-handler
         >
         </a-entity>
       </a-marker>
+      
       <a-entity camera></a-entity>
     </a-scene>
     
-    <!-- Added UI Elements -->
+    <!-- UI Elements -->
     <div class="food-info">
       <div class="food-title">Crispy Royale Platter</div>
       <div class="food-description">A mouthwatering feast of golden, crispy fried chicken paired with perfectly seasoned fries, served with a rich, flavorful sauce of your choice. Crafted to perfection for a satisfying crunch in every bite!</div>
@@ -252,6 +263,16 @@
     </div>
     
     <script>
+      // Hide loading message when AR is ready
+      window.addEventListener('load', function() {
+        const scene = document.querySelector('a-scene');
+        if (scene) {
+          scene.addEventListener('arjs-video-loaded', function() {
+            document.getElementById('loadingMsg').style.display = 'none';
+          });
+        }
+      });
+
       function navigateToPage(url) {
         window.location.href = url;
       }
@@ -267,7 +288,6 @@
       }
       
       function closeAR() {
-        // You can replace this URL with your desired redirect location
         window.location.href = "https://www.figma.com/proto/mEAnhvnJt7kbMEAda9nnCr/Untitled?node-id=13-137&p=f&t=gvO3AxjdD1IUfv4P-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=1%3A8";
       }
     </script>
